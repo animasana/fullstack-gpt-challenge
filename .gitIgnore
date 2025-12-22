@@ -1,0 +1,5 @@
+./day01/.env
+**/.env
+.env
+.venv/
+__pycache__/
