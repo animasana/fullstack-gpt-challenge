@@ -4,4 +4,6 @@
 **/.venv/
 **/.streamlit/
 **/.streamlit/secrets.toml
+**/old/
+**/.cache/
 __pycache__/

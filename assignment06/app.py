@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -9,7 +10,7 @@ from langchain_classic.storage.file_system import LocalFileStore
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.callbacks.base import BaseCallbackHandler
-import hashlib
+import tempfile
 
 st.set_page_config(
     page_title="Fullsack GPT Challenge Assignment 06",
@@ -42,7 +43,7 @@ with st.sidebar:
         "Upload a text file(.txt only)",
         type=["txt"],
     )
-    st.write("https://github.com/animasana/fullstack-gpt-challenge/tree/main/assignment06")
+    st.write("https://github.com/animasana/fullstack-gpt-challenge/tree/main/assignment06/app.py")
 
 
 llm = ChatOpenAI(    
@@ -54,39 +55,37 @@ llm = ChatOpenAI(
     api_key=OPENAI_API_KEY,
 )
 
-def sha256_encoder(key: str) -> str:
-    return hashlib.sha256(key.encode()).hexdigest()
-
 
 @st.cache_resource(show_spinner="Embedding document...")
 def embed_file(file):
-    # file_content = file.read()
-    file_path = f"./.cache/files/{file.name}"
-    # with open(file_path, "rb") as f:
-    #     f.write(file_content)
-
-    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(    
-        chunk_size=5000,
-        chunk_overlap=1000,
-    )
-    loader = TextLoader(file_path)
-    docs = loader.load_and_split(text_splitter=splitter)    
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-3-small", 
-        api_key=OPENAI_API_KEY
-    )
-    cache_dir = LocalFileStore(root_path=f"./.cache/embeddings/{file.name}")
-    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
-        underlying_embeddings=embeddings,
-        document_embedding_cache=cache_dir,
-        key_encoder=sha256_encoder,
-    )
-    vectorstore = FAISS.from_documents(
-        documents=docs, 
-        embedding=cached_embeddings,
-    )
-    retriever = vectorstore.as_retriever()
-    return retriever
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp_file:
+        tmp_file.write(file.read())
+        tmp_file_path = tmp_file.name
+    
+    
+    try:
+        splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(    
+            chunk_size=5000,
+            chunk_overlap=1000,
+        )
+        loader = TextLoader(tmp_file_path)
+        docs = loader.load_and_split(text_splitter=splitter)    
+        
+        embeddings = OpenAIEmbeddings(
+            model="text-embedding-3-small", 
+            api_key=OPENAI_API_KEY
+        )
+        
+        vectorstore = FAISS.from_documents(
+            documents=docs, 
+            embedding=embeddings,
+        )
+        retriever = vectorstore.as_retriever()
+        return retriever
+    
+    finally:
+        if os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
 
 
 def send_human_message(message):
