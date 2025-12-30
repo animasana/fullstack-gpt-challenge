@@ -38,11 +38,11 @@ with st.sidebar:
         label="OpenAI API Key",
         type="default",
     )
-
     file = st.file_uploader(
         "Upload a text file(.txt only)",
         type=["txt"],
     )
+    st.write("https://github.com/animasana/fullstack-gpt-challenge/tree/main/assignment06")
 
 
 llm = ChatOpenAI(    
