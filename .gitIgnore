@@ -1,5 +1,9 @@
-./day01/.env
 **/.env
 .env
 .venv/
+**/.venv/
+**/.streamlit/
+**/.streamlit/secrets.toml
+.cache/
+**/.cache/
 __pycache__/
