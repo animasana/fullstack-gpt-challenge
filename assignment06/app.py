@@ -60,10 +60,10 @@ def sha256_encoder(key: str) -> str:
 
 @st.cache_resource(show_spinner="Embedding document...")
 def embed_file(file):
-    file_content = file.read()
+    # file_content = file.read()
     file_path = f"./.cache/files/{file.name}"
-    with open(file_path, "wb") as f:
-        f.write(file_content)
+    # with open(file_path, "rb") as f:
+    #     f.write(file_content)
 
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(    
         chunk_size=5000,
