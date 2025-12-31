@@ -5,14 +5,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_classic.embeddings import CacheBackedEmbeddings
-from langchain_classic.storage.file_system import LocalFileStore
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.callbacks.base import BaseCallbackHandler
 import tempfile
-from langchain_community.cache import SQLiteCache
-from langchain_core.globals import set_llm_cache
 
 
 st.set_page_config(
@@ -22,9 +18,6 @@ st.set_page_config(
 
 
 history = StreamlitChatMessageHistory()
-
-
-set_llm_cache(SQLiteCache(database_path="database/documentgpt.db"))
 
 
 class ChatCallbackHandler(BaseCallbackHandler):
@@ -66,8 +59,7 @@ llm = ChatOpenAI(
 def embed_file(file):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp_file:
         tmp_file.write(file.read())
-        tmp_file_path = tmp_file.name
-    
+        tmp_file_path = tmp_file.name    
     
     try:
         splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(    
