@@ -1,9 +1,10 @@
 **/.env
 .env
 .venv/
+.cache/
 **/.venv/
+**/.cache/
 **/.streamlit/
 **/.streamlit/secrets.toml
 **/old/
-**/.cache/
 __pycache__/

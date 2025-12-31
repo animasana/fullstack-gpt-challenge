@@ -11,6 +11,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.callbacks.base import BaseCallbackHandler
 import tempfile
+from langchain_community.cache import SQLiteCache
+from langchain_core.globals import set_llm_cache
+
 
 st.set_page_config(
     page_title="Fullsack GPT Challenge Assignment 06",
@@ -19,6 +22,9 @@ st.set_page_config(
 
 
 history = StreamlitChatMessageHistory()
+
+
+set_llm_cache(SQLiteCache(database_path="database/documentgpt.db"))
 
 
 class ChatCallbackHandler(BaseCallbackHandler):
