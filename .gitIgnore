@@ -7,4 +7,5 @@
 **/.streamlit/
 **/.streamlit/secrets.toml
 **/old/
+**/.old/
 __pycache__/

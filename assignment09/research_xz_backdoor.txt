@@ -1,0 +1,49 @@
+XZ Utils backdoor (CVE-2024-3094) – research report
+
+Executive summary
+- In February 2024, a malicious backdoor was inserted into the upstream tarballs of XZ Utils (liblzma) versions 5.6.0 and 5.6.1 by an account using the name 'Jia Tan'. The backdoor allowed pre-auth remote code execution via OpenSSH on affected Linux systems if an attacker possessed a specific Ed448 private key. The vulnerability is tracked as CVE-2024-3094 and has a CVSS score of 10.0.
+
+- The backdoor did not appear in the Git source tree; it was present in the upstream tarballs released to distributors. It was publicly disclosed by developer Andres Freund on 29 March 2024. The event is widely discussed as a high-profile software supply-chain attack affecting XZ Utils, a widely used data compression toolkit.
+
+Background
+- XZ Utils (formerly LZMA Utils) provides tools such as xz and lzma to compress/decompress data using LZMA. It is integrated into many Linux distributions and is used for packaging artifacts.
+
+Incident overview and timeline
+- February 2024: The backdoored tarballs version 5.6.0 and 5.6.1 were released; the obfuscated code was introduced during the tarball build, altering liblzma behavior and enabling potential exploitation via OpenSSH when combined with the attacker’s Ed448 key.
+- March 29, 2024: Andres Freund reported the upstream compromise on the OSS-security mailing list, noting that the backdoor existed in the upstream tarballs, not in the Git repository.
+- March–April 2024: Widespread reporting by Ars Technica, Debian Red Hat advisories, and other media highlighted the supply-chain nature of the attack, and the risk of pre-auth RCE via sshd under specific conditions.
+- April 2024: Tukaani project provided timelines and updates; subsequent releases (5.6.2 and later) were published to replace compromised tarballs.
+
+Technical details (high-level)
+- The attack targeted the tarball release, not the Git source. A portion of the tarball is obfuscated to load a prebuilt object and modify liblzma in the build process.
+- The payload could influence sshd behavior, enabling pre-auth remote code execution if an attacker had a specific Ed448 private key and the system used the compromised build artifacts.
+- The Git repositories (git.tukaani.org) were not affected; the contamination was in upstream tarballs used by downstream distributions.
+- The backdoor’s discovery and analysis are summarized by the community: OSS-security posts, Ars Technica coverage, and Openwall’s disclosure page.
+
+Affected and fixed versions
+- Affected: Upstream tarballs for xz-utils 5.6.0 and 5.6.1.
+- Fixed: 5.6.2 and later releases; many distributions released advisories (CVE-2024-3094) and updated packages to safe builds.
+- Notable advisories and references include CVE-2024-3094 entries from MITRE (CVE), NVD, and Debian's CVE tracker, as well as vendor advisories and OSS-security lists detailing the incident and remediations.
+
+Impact and risk assessment
+- Potential pre-auth remote code execution through sshd in systems using the affected tarballs, if the attacker could trigger the payload with the Ed448 key. The exposure is particularly severe given SSH's role in remote administration.
+- At the time of discovery, propagation into production releases was limited; however, the incident underscored supply chain risk in open-source projects and the need for secure build pipelines and reproducible builds.
+
+Detection, mitigation, and best practices
+- Immediate steps: upgrade to XZ Utils 5.6.2+ or rebuild from trusted upstream tarballs; verify tarball signatures and checksums; ensure builds are reproducible; verify the source mirrors and GPG signatures.
+- Ongoing controls: SBOMs, provenance checking, diversified mirror sources, and monitoring of build and deployment pipelines for anomalies.
+- Vendor advisories to consult: MITRE CVE-2024-3094, NVD entry for CVE-2024-3094, Debian DSA-5649-1, and vendor blog posts and security advisories.
+
+Key references and sources
+- MITRE CVE-2024-3094 entry: CVE-2024-3094
+- NVD CVE-2024-3094 detail and CVSS 10.0
+- Debian security tracker CVE-2024-3094 (DSA-5649-1)
+- Openwall oss-security list: backdoor in upstream xz/liblzma leading to ssh server compromise (Mar 29, 2024)
+- Tukaani XZ Utils backdoor page: xz-backdoor
+- Ars Technica: Backdoor found in widely used Linux utility targets encrypted SSH connections (Mar 2024)
+- Hacker News discussions and community analyses
+
+Notes for defenders
+- The XZ Utils incident is a teachable case in software supply chain security: even widely trusted downstream tarballs can be compromised, while Git code remains clean. Reproducible builds and strict verification of source tarballs are essential.
+
+End of report
